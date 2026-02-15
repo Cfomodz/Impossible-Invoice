@@ -1,0 +1,27 @@
+{
+  "clientName": "Acme Corp",
+  "clientEmail": "cto@acme.com",
+  "clientWebsite": "https://acme.com",
+  "calendlyLink": "https://calendly.com/you/30min",
+  "companyName": "Your Company",
+  "companyEmail": "hello@yourcompany.com",
+  "currency": "USD",
+  "notes": "Payment is due within 7 days. After expiry, pricing and availability may change.",
+  "items": [
+    {
+      "description": "Web Application Development",
+      "hours": 40,
+      "rate": 150
+    },
+    {
+      "description": "UI/UX Design Consultation",
+      "hours": 10,
+      "rate": 200
+    },
+    {
+      "description": "Project Management",
+      "hours": 5,
+      "rate": 125
+    }
+  ]
+}

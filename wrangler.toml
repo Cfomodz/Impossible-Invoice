@@ -1,0 +1,29 @@
+# Cloudflare Worker Configuration
+# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/
+
+name = "invoice-system"
+main = "src/index.ts"
+compatibility_date = "2025-10-19"
+
+# Static assets configuration
+[assets]
+directory = "./public"
+binding = "ASSETS"
+html_handling = "drop-trailing-slash"
+not_found_handling = "404-page"
+# Only invoke Worker for API routes — static pages served free from CDN
+run_worker_first = ["/api/*"]
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "invoice-db"
+database_id = "your-database-id"  # TODO: Replace after running `wrangler d1 create invoice-db`
+
+# Cron trigger: daily at 9 AM UTC
+[triggers]
+crons = ["0 9 * * *"]
+
+# Observability (logging and tracing)
+[observability]
+enabled = true

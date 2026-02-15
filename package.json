@@ -1,0 +1,33 @@
+{
+  "name": "impossible-invoice",
+  "version": "1.0.0",
+  "description": "Mission Impossible Self-Destructing Invoice System — Cloudflare Worker with brand-matched static invoices, countdown timers, and Thanos snap self-destruct animation",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build.js",
+    "dev": "wrangler dev",
+    "dev:cron": "wrangler dev --test-scheduled",
+    "deploy": "wrangler deploy",
+    "db:create": "wrangler d1 create invoice-db",
+    "db:migrate": "wrangler d1 execute invoice-db --file=schema.sql",
+    "db:migrate:local": "wrangler d1 execute invoice-db --local --file=schema.sql",
+    "test": "echo \"TODO: Add test runner\" && exit 0"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "ejs": "^3.1.10",
+    "html2canvas": "^1.4.1",
+    "postcss": "^8.4.49",
+    "resend": "^4.1.0",
+    "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250109.0",
+    "playwright": "^1.49.1",
+    "typescript": "^5.7.3",
+    "wrangler": "^3.99.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

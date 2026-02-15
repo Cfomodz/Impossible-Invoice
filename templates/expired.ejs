@@ -1,0 +1,108 @@
+<%# templates/expired.ejs
+    Standalone expired page template.
+    Used as reference for the expired state embedded in invoice.ejs.
+    Can also be rendered separately if needed for direct linking. %>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <title>Invoice Expired - <%= clientName %></title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #f9fafb;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: #1f2937;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      font-size: 1.25rem;
+      color: #6b7280;
+      max-width: 500px;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .cta-button {
+      display: inline-block;
+      padding: 1rem 2.5rem;
+      background: <%= brandColor || '#2563eb' %>;
+      color: white;
+      text-decoration: none;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      font-size: 1.125rem;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .cta-button:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .calendly-inline-widget {
+      width: 100%;
+      max-width: 600px;
+      min-height: 630px;
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 640px) {
+      h1 {
+        font-size: 1.75rem;
+      }
+      .subtitle {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>This invoice has self-destructed!</h1>
+
+  <p class="subtitle">
+    Your mission, should you choose to accept it, is to book a new call.
+    Pricing and availability may have changed.
+  </p>
+
+  <a href="<%= calendlyLink %>?utm_source=expired_invoice&utm_content=<%= id %>&name=<%= encodeURIComponent(clientName) %>&email=<%= encodeURIComponent(clientEmail) %>"
+     class="cta-button"
+     target="_blank"
+     rel="noopener noreferrer">
+    Book a Call to Get Updated Pricing
+  </a>
+
+  <!-- Calendly inline embed -->
+  <div class="calendly-inline-widget"
+       data-url="<%= calendlyLink %>?utm_source=expired_invoice&utm_content=<%= id %>&name=<%= encodeURIComponent(clientName) %>&email=<%= encodeURIComponent(clientEmail) %>">
+  </div>
+
+  <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
+
+</body>
+</html>
