@@ -1,0 +1,101 @@
+/* static/base.css
+   Base layout styles for the invoice page.
+   These are NON-brand styles — structural layout, responsive grid, etc.
+   Brand-specific styles are injected via LLM-generated CSS or fallback. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  background: #f9fafb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem;
+}
+
+/* Invoice container — the main target for brand CSS and disintegration */
+.invoice-container {
+  width: 100%;
+  max-width: 800px;
+  background: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  position: relative;
+}
+
+/* Expired state — hidden by default, shown after self-destruct */
+.expired-state {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 60vh;
+  padding: 3rem 2rem;
+  gap: 1.5rem;
+}
+
+.expired-state h1 {
+  font-size: 2rem;
+  color: #1f2937;
+  font-weight: 800;
+}
+
+.expired-state .subtitle {
+  font-size: 1.125rem;
+  color: #6b7280;
+  max-width: 500px;
+  line-height: 1.6;
+}
+
+.expired-state .cta-button {
+  margin-top: 1rem;
+}
+
+/* Calendly embed container */
+.calendly-inline-widget {
+  width: 100%;
+  max-width: 600px;
+  min-height: 630px;
+  margin-top: 2rem;
+}
+
+/* Utility: screen-reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white;
+    padding: 0;
+  }
+  .invoice-container {
+    box-shadow: none;
+    border-radius: 0;
+  }
+  .expired-state {
+    display: none !important;
+  }
+}

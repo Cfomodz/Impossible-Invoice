@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' https://assets.calendly.com; frame-src https://calendly.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;">
+  <title>Invoice - <%= clientName %></title>
+  <link rel="stylesheet" href="base.css">
+  <style>
+    /* LLM-generated or fallback brand CSS injected at build time */
+    <%- brandCSS %>
+  </style>
+</head>
+<body>
+
+  <!-- Invoice Container — target for self-destruct animation -->
+  <div class="invoice-container">
+
+    <div class="invoice-header">
+      <div class="company-info">
+        <h1><%= companyName || 'Your Company' %></h1>
+        <% if (companyEmail) { %>
+          <p><%= companyEmail %></p>
+        <% } %>
+      </div>
+      <div class="invoice-number">
+        <h2>INVOICE</h2>
+        <p>#<%= id.substring(0, 8).toUpperCase() %></p>
+      </div>
+    </div>
+
+    <div class="invoice-meta">
+      <div class="bill-to">
+        <strong>Bill To:</strong>
+        <p><%= clientName %></p>
+        <% if (clientEmail) { %>
+          <p><%= clientEmail %></p>
+        <% } %>
+      </div>
+      <div class="invoice-details">
+        <p><strong>Date:</strong> <%= new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+        <p><strong>Due Date:</strong> <%= new Date(expiryTimestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+        <p><strong>Currency:</strong> <%= currency || 'USD' %></p>
+      </div>
+    </div>
+
+    <table class="invoice-table">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Hours</th>
+          <th>Rate</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% items.forEach(function(item) { %>
+          <tr>
+            <td><%= item.description %></td>
+            <td><%= item.hours %></td>
+            <td><%= (currency || 'USD') === 'USD' ? '$' : '' %><%= item.rate.toLocaleString('en-US', { minimumFractionDigits: 2 }) %></td>
+            <td><%= (currency || 'USD') === 'USD' ? '$' : '' %><%= (item.hours * item.rate).toLocaleString('en-US', { minimumFractionDigits: 2 }) %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+
+    <div class="invoice-totals">
+      <p>
+        Total: <%= (currency || 'USD') === 'USD' ? '$' : '' %><%= items.reduce(function(s, i) { return s + i.hours * i.rate; }, 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) %> <%= currency || 'USD' %>
+      </p>
+    </div>
+
+    <% if (notes) { %>
+      <div class="invoice-notes">
+        <p><strong>Notes:</strong> <%= notes %></p>
+      </div>
+    <% } %>
+
+    <!-- Countdown Timer -->
+    <div class="countdown-display" data-expiry="<%= expiryTimestamp %>">
+      Loading countdown...
+    </div>
+
+    <div class="invoice-footer">
+      <p>This invoice will self-destruct when the countdown reaches zero.</p>
+      <p>Accept this proposal before it expires to lock in current pricing.</p>
+    </div>
+
+  </div>
+
+  <!-- Expired State — hidden until self-destruct animation completes -->
+  <div class="expired-state">
+    <h1>This invoice has self-destructed!</h1>
+    <p class="subtitle">Your mission, should you choose to accept it, is to book a new call.</p>
+    <a href="<%= calendlyLink %>?utm_source=expired_invoice&utm_content=<%= id %>&name=<%= encodeURIComponent(clientName) %>&email=<%= encodeURIComponent(clientEmail) %>"
+       class="cta-button"
+       target="_blank"
+       rel="noopener noreferrer">
+      Book a Call to Get Updated Pricing
+    </a>
+    <!-- Calendly inline embed -->
+    <div class="calendly-inline-widget"
+         data-url="<%= calendlyLink %>?utm_source=expired_invoice&utm_content=<%= id %>&name=<%= encodeURIComponent(clientName) %>&email=<%= encodeURIComponent(clientEmail) %>">
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
+  <script src="self-destruct.js"></script>
+  <script src="countdown.js"></script>
+
+</body>
+</html>
