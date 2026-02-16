@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self' https://assets.calendly.com; frame-src https://calendly.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;">
+        content="default-src 'self'; script-src 'self' https://assets.calendly.com; frame-src https://calendly.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:;">
   <title>Invoice - <%= clientName %></title>
   <link rel="stylesheet" href="base.css">
   <style>
@@ -73,7 +73,7 @@
       </p>
     </div>
 
-    <% if (notes) { %>
+    <% if (typeof notes !== 'undefined' && notes) { %>
       <div class="invoice-notes">
         <p><strong>Notes:</strong> <%= notes %></p>
       </div>
@@ -109,6 +109,7 @@
 
   <!-- Scripts -->
   <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
+  <script src="html2canvas.min.js"></script>
   <script src="self-destruct.js"></script>
   <script src="countdown.js"></script>
 

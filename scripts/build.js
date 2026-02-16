@@ -74,6 +74,17 @@ async function build() {
     fs.copyFileSync(path.join(staticDir, file), path.join(outDir, file));
   }
 
+  // Step 4b: Copy html2canvas from node_modules (used by self-destruct.js)
+  const html2canvasPath = path.join(
+    __dirname,
+    "../node_modules/html2canvas/dist/html2canvas.min.js"
+  );
+  if (fs.existsSync(html2canvasPath)) {
+    fs.copyFileSync(html2canvasPath, path.join(outDir, "html2canvas.min.js"));
+  } else {
+    console.warn("html2canvas.min.js not found in node_modules — self-destruct animation will be skipped");
+  }
+
   // Step 5: Write robots.txt
   fs.mkdirSync(path.join(__dirname, "../public"), { recursive: true });
   fs.writeFileSync(
@@ -90,7 +101,7 @@ async function build() {
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: no-referrer
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://assets.calendly.com; frame-src https://calendly.com
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://assets.calendly.com; frame-src https://calendly.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:
 `
   );
 

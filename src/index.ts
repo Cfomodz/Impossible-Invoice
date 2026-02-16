@@ -5,6 +5,7 @@ interface Env {
   RESEND_API_KEY: string;
   ASSETS: Fetcher;
   REGISTER_SECRET: string;
+  FROM_EMAIL?: string;
 }
 
 interface InvoiceRecord {
@@ -38,7 +39,39 @@ export default {
       try {
         const invoice = (await request.json()) as Record<string, unknown>;
 
-        // TODO: Add input validation for required fields
+        // Validate required fields
+        const required = [
+          "id",
+          "clientName",
+          "clientEmail",
+          "amount",
+          "expiryTimestamp",
+          "pageUrl",
+        ] as const;
+        const missing = required.filter((f) => !invoice[f]);
+        if (missing.length > 0) {
+          return new Response(
+            JSON.stringify({
+              error: `Missing required fields: ${missing.join(", ")}`,
+            }),
+            { status: 400, headers: { "Content-Type": "application/json" } }
+          );
+        }
+
+        if (typeof invoice.amount !== "number" || invoice.amount <= 0) {
+          return new Response(
+            JSON.stringify({ error: "amount must be a positive number" }),
+            { status: 400, headers: { "Content-Type": "application/json" } }
+          );
+        }
+        if (typeof invoice.expiryTimestamp !== "number") {
+          return new Response(
+            JSON.stringify({
+              error: "expiryTimestamp must be a number (UTC milliseconds)",
+            }),
+            { status: 400, headers: { "Content-Type": "application/json" } }
+          );
+        }
 
         await env.DB.prepare(
           `INSERT INTO invoices (id, client_name, client_email, amount, currency, expiry_timestamp, page_url, calendly_link)
@@ -95,15 +128,21 @@ async function processExpiredInvoices(env: Env): Promise<void> {
   for (const inv of results) {
     try {
       const { error } = await resend.emails.send({
-        from: "invoices@yourdomain.com", // TODO: Configure sending domain
+        from: env.FROM_EMAIL || "invoices@yourdomain.com",
         to: inv.client_email,
-        subject: "Your invoice has self-destructed",
-        html: `<h1>Invoice Expired</h1>
-<p>Hi ${inv.client_name},</p>
-<p>The proposal we sent has passed its expiry window.
-Pricing and availability may have changed.</p>
-<p><a href="${inv.calendly_link}">Book a quick call</a>
-to get an updated proposal.</p>`,
+        subject: "Your invoice has expired — book a call for updated pricing",
+        html: `<!DOCTYPE html>
+<html>
+<body style="font-family: system-ui, -apple-system, sans-serif; color: #1f2937; max-width: 600px; margin: 0 auto; padding: 2rem;">
+  <h1 style="color: #991b1b;">Invoice Expired</h1>
+  <p>Hi ${inv.client_name},</p>
+  <p>The invoice we sent you (${inv.currency} ${inv.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}) has passed its expiry window. Pricing and availability may have changed.</p>
+  <p>Ready to move forward? Book a quick call to get an updated proposal:</p>
+  <p style="text-align: center; margin: 2rem 0;">
+    <a href="${inv.calendly_link}" style="display: inline-block; padding: 0.75rem 2rem; background: #2563eb; color: white; text-decoration: none; border-radius: 0.5rem; font-weight: 600;">Book a Call</a>
+  </p>
+</body>
+</html>`,
       });
 
       if (!error) {
