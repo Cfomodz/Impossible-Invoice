@@ -77,6 +77,15 @@ REQUIREMENTS:
 async function validateCSS(css) {
   const root = postcss.parse(css);
   root.walkRules((rule) => {
+    // Skip keyframe step selectors (0%, 100%, etc.) — prefixing them would
+    // emit invalid CSS like ".invoice-container 0%".
+    if (
+      rule.parent &&
+      rule.parent.type === "atrule" &&
+      /^keyframes$/i.test(rule.parent.name)
+    ) {
+      return;
+    }
     if (!rule.selector.includes(".invoice-container")) {
       rule.selector = `.invoice-container ${rule.selector}`;
     }

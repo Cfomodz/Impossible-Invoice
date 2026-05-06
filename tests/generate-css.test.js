@@ -83,4 +83,22 @@ describe("validateCSS", () => {
     assert.ok(result.includes("@media print"));
     assert.ok(result.includes(".invoice-container .hide"));
   });
+
+  it("does not prefix @keyframes step selectors", async () => {
+    const input = `@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }`;
+    const result = await validateCSS(input);
+    assert.ok(result.includes("@keyframes pulse"), "Should preserve @keyframes rule");
+    assert.ok(
+      !result.includes(".invoice-container 0%"),
+      "Should not prefix 0% keyframe step"
+    );
+    assert.ok(
+      !result.includes(".invoice-container 50%"),
+      "Should not prefix 50% keyframe step"
+    );
+    assert.ok(
+      !result.includes(".invoice-container 100%"),
+      "Should not prefix 100% keyframe step"
+    );
+  });
 });

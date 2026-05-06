@@ -5,17 +5,39 @@
 const { describe, it, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 const { execSync } = require("child_process");
 
 const ROOT = path.join(__dirname, "..");
 const PUBLIC_DIR = path.join(ROOT, "public");
-const TEST_DATA = path.join(ROOT, "test-invoice.json");
+// Temporary invoice fixture without clientWebsite — avoids Playwright/live network
+// in CI so the build step is deterministic and offline-safe.
+const TEMP_TEST_DATA = path.join(os.tmpdir(), "test-invoice-no-website.json");
+
+const TEST_INVOICE = {
+  clientName: "Acme Corp",
+  clientEmail: "cto@acme.com",
+  calendlyLink: "https://calendly.com/you/30min",
+  companyName: "Your Company",
+  companyEmail: "hello@yourcompany.com",
+  currency: "USD",
+  notes: "Payment is due within 7 days. After expiry, pricing and availability may change.",
+  items: [
+    { description: "Web Application Development", hours: 40, rate: 150 },
+    { description: "UI/UX Design Consultation", hours: 10, rate: 200 },
+    { description: "Project Management", hours: 5, rate: 125 },
+  ],
+};
 
 describe("Build Pipeline", () => {
   let invoiceId;
 
   before(() => {
+    // Write the fixture without clientWebsite so the build uses fallback CSS
+    // and never launches Playwright or makes live network requests.
+    fs.writeFileSync(TEMP_TEST_DATA, JSON.stringify(TEST_INVOICE));
+
     // Clean any previous build output
     if (fs.existsSync(PUBLIC_DIR)) {
       fs.rmSync(PUBLIC_DIR, { recursive: true });
@@ -24,7 +46,7 @@ describe("Build Pipeline", () => {
     // Run the build
     execSync(`node scripts/build.js`, {
       cwd: ROOT,
-      env: { ...process.env, INVOICE_DATA_FILE: TEST_DATA },
+      env: { ...process.env, INVOICE_DATA_FILE: TEMP_TEST_DATA },
       stdio: "pipe",
     });
 
@@ -34,7 +56,8 @@ describe("Build Pipeline", () => {
   });
 
   after(() => {
-    // Clean up build output
+    // Clean up temp fixture and build output
+    if (fs.existsSync(TEMP_TEST_DATA)) fs.unlinkSync(TEMP_TEST_DATA);
     if (fs.existsSync(PUBLIC_DIR)) {
       fs.rmSync(PUBLIC_DIR, { recursive: true });
     }

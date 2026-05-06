@@ -7,12 +7,13 @@ const fs = require("fs");
 
 const MAX_RETRIES = 4;
 const BASE_DELAY_MS = 2000;
+const FETCH_TIMEOUT_MS = 30000;
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function registerInvoice() {
+async function registerInvoice({ fetchFn = globalThis.fetch, sleepFn = sleep } = {}) {
   const metaPath = "/tmp/invoice-meta.json";
 
   if (!fs.existsSync(metaPath)) {
@@ -35,14 +36,23 @@ async function registerInvoice() {
   let lastError;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const response = await fetch(`${workerUrl}/api/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${registerSecret}`,
-        },
-        body: JSON.stringify(meta),
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+      let response;
+      try {
+        response = await fetchFn(`${workerUrl}/api/register`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${registerSecret}`,
+          },
+          body: JSON.stringify(meta),
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timeoutId);
+      }
 
       if (!response.ok) {
         const body = await response.text();
@@ -67,7 +77,7 @@ async function registerInvoice() {
         console.warn(
           `Attempt ${attempt + 1} failed: ${err.message}. Retrying in ${delay / 1000}s...`
         );
-        await sleep(delay);
+        await sleepFn(delay);
       }
     }
   }
@@ -77,7 +87,11 @@ async function registerInvoice() {
   );
 }
 
-registerInvoice().catch((err) => {
-  console.error("Registration failed:", err);
-  process.exit(1);
-});
+module.exports = { registerInvoice };
+
+if (require.main === module) {
+  registerInvoice().catch((err) => {
+    console.error("Registration failed:", err);
+    process.exit(1);
+  });
+}
